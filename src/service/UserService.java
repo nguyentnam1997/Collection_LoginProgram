@@ -64,7 +64,6 @@ public class UserService {
                 System.out.println("Incorrect username, please try again!");
                 continue;
             }
-                //count = checkExistsUsername(count, username, users);
             if (userMap.containsKey(username)) {
                 System.out.println("Username already exists, try again!");
                 continue;
@@ -73,11 +72,12 @@ public class UserService {
                 //count = 0;
                 System.out.println("Please input your email:");
                 String email = scanner.nextLine();
-                if (!isValidEmail(email) || checkExistsEmail(email, userMap) == null) {
+                if (!isValidEmail(email)) {
                     System.out.println("Incorrect email, please try again!");
+                    continue;
                 }
+                else if (checkExistsEmail(email, userMap) == null) continue;
                 else {
-                    //count = checkExistsEmail(count, email, users);
                     do {
                         System.out.println("Please input your password:");
                         String password = scanner.nextLine();
@@ -92,8 +92,10 @@ public class UserService {
                     }
                     while (true);
                 }
+                break;
             }
             while (true);
+            break;
         }
         while (true);
     }
@@ -122,10 +124,8 @@ public class UserService {
                                 break;
                         }
                     }
-                    //count = checkExistsUsername(count, username, userMap);
                     else {
                         checkPassword(scanner, username, userMap, show);
-                        //selectOptionAfterLogin(scanner, user, users, show);
                     }
                     break;
                 }
@@ -138,7 +138,8 @@ public class UserService {
             System.out.println("Please input your password:");
             String password = scanner.nextLine();
             if (userMap.get(username).getPassword().equals(password)) {
-                show.reEnterOrForgetPass();
+                System.out.println("------ Login successful! ------");
+                /*show.reEnterOrForgetPass();
                 int choosePw = Integer.parseInt(scanner.nextLine());
                 switch (choosePw) {
                     case 1 -> {
@@ -147,125 +148,16 @@ public class UserService {
                     case 2 -> {
                         changePassword(scanner, userMap.get(username));
                     }
-                }
+                }*/
             }
             else {
-                System.out.println("------ Login successful! ------");
+                System.out.println("Incorrect password, please try again!");
+                continue;
             }
             break;
         }
         while (true);
     }
-    /*public void selectOptionAfterLogin(Scanner scanner, User user, ArrayList<User> users, Show show) {
-        do {
-            show.viewOptionAfterLogin();
-            System.out.println("Welcome " + user.getUsername() + " , please choose the options above:");
-            int select = Integer.parseInt(scanner.nextLine());
-            switch (select) {
-                case 1:
-                    changeUsername(scanner, user, users);
-                    continue;
-                case 2:
-                    changeEmail(scanner, user, users);
-                    continue;
-                case 3:
-                    changePassword(scanner, user);
-                    continue;
-                case 4:
-                    break;
-                case 0:
-                    System.out.println("Goodbye!");
-                    System.exit(0);
-                    break;
-            }
-            break;
-        }
-        while (true);
-    }*/
-    /*public void changeUsername(Scanner scanner, User user, ArrayList<User> users) {
-        int count = 0;
-        do {
-            System.out.println("Please re-input your username:");
-            String username = scanner.nextLine();
-            if (!user.getUsername().equalsIgnoreCase(username)) {
-                System.out.println("Incorrect username, please try again!");
-                continue;
-            }
-            else {
-                do {
-                    System.out.println("Please input your password:");
-                    String password = scanner.nextLine();
-                    if (!user.getPassword().equalsIgnoreCase(password)) {
-                        System.out.println("Incorrect password, please try again!");
-                        continue;
-                    }
-                        do {
-                            count = 0;
-                            System.out.println("Please enter your new username:");
-                            String newUsername = scanner.nextLine();
-                            if (!isValidUsername(newUsername)) {
-                                System.out.println("Incorrect username, please try again!");
-                                continue;
-                            }
-                            count = checkExistsUsername(count, newUsername, users);
-                            if (count != 0) {
-                                System.out.println("Username already exists, please re-enter");
-                                continue;
-                            }
-                            else {
-                                user.setUsername(newUsername);
-                                System.out.println("Create new username successful!!!");
-                            }
-                            break;
-                        }
-                        while (true);
-                    break;
-                }
-                while (true);
-            }
-            break;
-        }
-        while (true);
-    }*/
-   /* public void changeEmail(Scanner scanner, User user, ArrayList<User> users) {
-        int count = 0;
-        do {
-            System.out.println("Please re-input your email:");
-            String email = scanner.nextLine();
-            if (!user.getEmail().equalsIgnoreCase(email)) {
-                System.out.println("Incorrect email, please try again!");
-                continue;
-            }
-                do {
-                    System.out.println("Please input your password:");
-                    String password = scanner.nextLine();
-                    if (!user.getPassword().equalsIgnoreCase(password)) {
-                        System.out.println("Incorrect password, please try again!");
-                        continue;
-                    }
-                    else {
-                        do {
-                            count = 0;
-                            System.out.println("Please enter your new email:");
-                            String newEmail = scanner.nextLine();
-                            count = checkExistsEmail(count, newEmail, users);
-                            if (count != 0) {
-                                System.out.println("Email already exists, please re-enter");
-                                continue;
-                            }
-                                user.setEmail(newEmail);
-                                System.out.println("Create new email successful!!!");
-                            break;
-                        }
-                        while (true);
-                    }
-                    break;
-                }
-                while (true);
-            break;
-        }
-        while (true);
-    }*/
     public void changePassword(Scanner scanner, User user) {
         do {
             System.out.println("Please input your email:");
@@ -291,6 +183,30 @@ public class UserService {
                 }
                 while (true);
             break;
+        }
+        while (true);
+    }
+    public void LoginProgram(Scanner scanner, Show menu, Map<String, User> userMap) {
+        do {
+            menu.welcomeMenu();
+            try {
+                int choose = Integer.parseInt(scanner.nextLine());
+                if (choose < 1 || choose > 2) {
+                    System.out.println("Invalid value, please try again!");
+                    continue;
+                }
+                switch (choose) {
+                    case 1 -> {
+                        Login(scanner, userMap, menu);
+                    }
+                    case 2 -> {
+                        registerUser(scanner, userMap);
+                    }
+                }
+            }
+            catch (Exception e) {
+                System.out.println("Invalid value, please try again!");
+            }
         }
         while (true);
     }
