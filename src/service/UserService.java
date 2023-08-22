@@ -107,7 +107,6 @@ public class UserService {
             }
             else {
                 do {
-                    int count = 0;
                     System.out.println("Please input your username:");
                     String username = scanner.nextLine();
                     if (!isValidUsername(username)) {
