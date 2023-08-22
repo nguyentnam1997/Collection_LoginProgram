@@ -158,34 +158,6 @@ public class UserService {
         }
         while (true);
     }
-    public void changePassword(Scanner scanner, User user) {
-        do {
-            System.out.println("Please input your email:");
-            String email = scanner.nextLine();
-            if (!user.getEmail().equalsIgnoreCase(email)) {
-                System.out.println("Incorrect email, please try again!");
-                continue;
-            }
-                do {
-                    System.out.println("Please input new password: ");
-                    String newPassword = scanner.nextLine();
-                    if (!isValidPassword(newPassword)) {
-                        System.out.println("Incorrect password, please try again!");
-                        continue;
-                    }
-                    if (newPassword.equals(user.getPassword())) {
-                        System.out.println("This password has been created before, please try again!");
-                        continue;
-                    }
-                        System.out.println("Create new password successful!!!");
-                        user.setPassword(newPassword);
-                    break;
-                }
-                while (true);
-            break;
-        }
-        while (true);
-    }
     public void LoginProgram(Scanner scanner, Show menu, Map<String, User> userMap) {
         do {
             menu.welcomeMenu();
@@ -203,10 +175,14 @@ public class UserService {
                         registerUser(scanner, userMap);
                     }
                 }
+                System.out.println("Continue? (Y/N)?");
+                String input = scanner.nextLine();
+                if (input.equalsIgnoreCase("y")) continue;
             }
             catch (Exception e) {
                 System.out.println("Invalid value, please try again!");
             }
+            break;
         }
         while (true);
     }
