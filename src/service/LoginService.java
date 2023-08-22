@@ -4,29 +4,27 @@ import entities.User;
 import view.Show;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Scanner;
 
 public class LoginService {
-    public void LoginAndRegisterProgram(Scanner scanner, Show menu, UserService userService, ArrayList<User> users) {
+    public void LoginAndRegisterProgram(Scanner scanner, Show menu, UserService userService, Map<String, User> userMap) {
         do {
+            menu.welcomeMenu();
             try {
-                do {
-                    menu.welcomeMenu();
-                    int choose = Integer.parseInt(scanner.nextLine());
-                    if (choose < 1 || choose > 2) {
-                        System.out.println("Invalid value, please try again!");
-                        continue;
+                int choose = Integer.parseInt(scanner.nextLine());
+                if (choose < 1 || choose > 2) {
+                    System.out.println("Invalid value, please try again!");
+                    continue;
+                }
+                switch (choose) {
+                    case 1 -> {
+                        userService.Login(scanner, userMap, menu);
                     }
-                    switch (choose) {
-                        case 1 -> {
-                            userService.Login(scanner, users, menu, userService);
-                        }
-                        case 2 -> {
-                            users.add(userService.registerUser(scanner, users));
-                        }
+                    case 2 -> {
+                        userService.registerUser(scanner, userMap);
                     }
                 }
-                while(true);
             }
             catch (Exception e) {
                 System.out.println("Invalid value, please try again!");

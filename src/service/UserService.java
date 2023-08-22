@@ -4,6 +4,7 @@ import entities.User;
 import view.Show;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,7 +12,7 @@ import java.util.regex.Pattern;
 public class UserService {
     //check điều kiện username
     public static boolean isValidUsername(String username) {
-        // Định dạng regex cho mật khẩu
+        // Định dạng regex cho username
         String usernameRegex = "^[a-zA-Z0-9]+$";
         Pattern pattern = Pattern.compile(usernameRegex);
         Matcher matcher = pattern.matcher(username);
@@ -34,74 +35,73 @@ public class UserService {
         return matcher.matches();
     }
     //check tồn tại username
-    public int checkExistsUsername(int count, String username, ArrayList<User> users) {
+    /*public int checkExistsUsername(int count, String username, ArrayList<User> users) {
         for (User us : users) {
             if (us.getUsername().equalsIgnoreCase(username)) {
                 count++;
             }
         }
         return count;
-    }
+    }*/
     //check tồn tại email
-    public int checkExistsEmail(int count, String email, ArrayList<User> users) {
-        for (User us : users) {
-            if (us.getEmail().equalsIgnoreCase(email)) {
-                count++;
+    public String checkExistsEmail(String email, Map<String, User> userMap) {
+        for (Map.Entry<String, User> entry : userMap.entrySet()) {
+            if (entry.getValue().getEmail().equalsIgnoreCase(email)) {
+                System.out.println("Email already exists, try again!");
+                return null;
             }
         }
-        return count;
+        return email;
     }
     //đăng ký tài khoản
-    public User registerUser(Scanner scanner, ArrayList<User> users) {
+    public void registerUser(Scanner scanner, Map<String, User> userMap) {
         System.out.println("------ REGISTER -------");
         do {
-            int count = 0;
+            //int count = 0;
             System.out.println("Please input your username:");
             String username = scanner.nextLine();
             if (!isValidUsername(username)) {
                 System.out.println("Incorrect username, please try again!");
                 continue;
             }
-                count = checkExistsUsername(count, username, users);
-                if (count != 0) {
-                    System.out.println("Username already exists, try again!");
-                    continue;
+                //count = checkExistsUsername(count, username, users);
+            if (userMap.containsKey(username)) {
+                System.out.println("Username already exists, try again!");
+                continue;
+            }
+            do {
+                //count = 0;
+                System.out.println("Please input your email:");
+                String email = scanner.nextLine();
+                if (!isValidEmail(email) || checkExistsEmail(email, userMap) == null) {
+                    System.out.println("Incorrect email, please try again!");
                 }
+                else {
+                    //count = checkExistsEmail(count, email, users);
                     do {
-                        count = 0;
-                        System.out.println("Please input your email:");
-                        String email = scanner.nextLine();
-                        if (!isValidEmail(email)) {
-                            System.out.println("Incorrect email, please try again!");
+                        System.out.println("Please input your password:");
+                        String password = scanner.nextLine();
+                        if (!isValidPassword(password)) {
+                            System.out.println("Incorrect password, please try again!");
+                            continue;
                         }
-                        else {
-                            count = checkExistsEmail(count, email, users);
-                            if (count != 0) {
-                                System.out.println("Email already exists, try again!");
-                                continue;
-                            }
-                            do {
-                                System.out.println("Please input your password:");
-                                String password = scanner.nextLine();
-                                if (!isValidPassword(password)) {
-                                    System.out.println("Incorrect password, please try again!");
-                                    continue;
-                                }
-                                    System.out.println("Register user successful!!!");
-                                    return new User(username, email, password);
-                            }
-                            while (true);
-                        }
+                        System.out.println("Register user successful!!!");
+                        User user = new User(username, email, password);
+                        userMap.put(user.getUsername(), user);
+                        break;
                     }
                     while (true);
+                }
+            }
+            while (true);
         }
         while (true);
     }
     //đăng nhập
-    public void Login(Scanner scanner, ArrayList<User> users, Show show, UserService userService) {
-            if (users.size() == 0) {
+    public void Login(Scanner scanner, Map<String, User> userMap, Show show) {
+            if (userMap.size() == 0) {
                 System.out.println("No user exists, please register first!");
-                users.add(registerUser(scanner, users));
+                registerUser(scanner, userMap);
             }
             else {
                 do {
@@ -112,8 +112,7 @@ public class UserService {
                         System.out.println("Incorrect username, please try again!");
                         continue;
                     }
-                    count = checkExistsUsername(count, username, users);
-                    if (count == 0) {
+                    else if (!userMap.containsKey(username)) {
                         show.reEnterUserOrBack();
                         int choose = Integer.parseInt(scanner.nextLine());
                         switch (choose) {
@@ -123,14 +122,10 @@ public class UserService {
                                 break;
                         }
                     }
+                    //count = checkExistsUsername(count, username, userMap);
                     else {
-                        for (User user : users) {
-                            if (user.getUsername().equalsIgnoreCase(username)) {
-                                checkPassword(scanner, user, show);
-                                selectOptionAfterLogin(scanner, user, users, show);
-                                break;
-                            }
-                        }
+                        checkPassword(scanner, username, userMap, show);
+                        //selectOptionAfterLogin(scanner, user, users, show);
                     }
                     break;
                 }
@@ -138,11 +133,11 @@ public class UserService {
             }
     }
     //kiểm tra mật khẩu
-    public void checkPassword(Scanner scanner, User user, Show show) {
+    public void checkPassword(Scanner scanner, String username, Map<String, User> userMap, Show show) {
         do {
             System.out.println("Please input your password:");
             String password = scanner.nextLine();
-            if (!user.getPassword().equals(password)) {
+            if (userMap.get(username).getPassword().equals(password)) {
                 show.reEnterOrForgetPass();
                 int choosePw = Integer.parseInt(scanner.nextLine());
                 switch (choosePw) {
@@ -150,7 +145,7 @@ public class UserService {
                         continue;
                     }
                     case 2 -> {
-                        changePassword(scanner, user);
+                        changePassword(scanner, userMap.get(username));
                     }
                 }
             }
@@ -161,7 +156,7 @@ public class UserService {
         }
         while (true);
     }
-    public void selectOptionAfterLogin(Scanner scanner, User user, ArrayList<User> users, Show show) {
+    /*public void selectOptionAfterLogin(Scanner scanner, User user, ArrayList<User> users, Show show) {
         do {
             show.viewOptionAfterLogin();
             System.out.println("Welcome " + user.getUsername() + " , please choose the options above:");
@@ -186,8 +181,8 @@ public class UserService {
             break;
         }
         while (true);
-    }
-    public void changeUsername(Scanner scanner, User user, ArrayList<User> users) {
+    }*/
+    /*public void changeUsername(Scanner scanner, User user, ArrayList<User> users) {
         int count = 0;
         do {
             System.out.println("Please re-input your username:");
@@ -231,8 +226,8 @@ public class UserService {
             break;
         }
         while (true);
-    }
-    public void changeEmail(Scanner scanner, User user, ArrayList<User> users) {
+    }*/
+   /* public void changeEmail(Scanner scanner, User user, ArrayList<User> users) {
         int count = 0;
         do {
             System.out.println("Please re-input your email:");
@@ -270,7 +265,7 @@ public class UserService {
             break;
         }
         while (true);
-    }
+    }*/
     public void changePassword(Scanner scanner, User user) {
         do {
             System.out.println("Please input your email:");
